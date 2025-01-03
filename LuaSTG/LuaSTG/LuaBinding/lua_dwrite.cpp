@@ -1,4 +1,4 @@
-﻿#include "lua_dwrite.hpp"
+#include "lua_dwrite.hpp"
 
 #include <cassert>
 #include <string>
@@ -14,6 +14,7 @@
 #include "AppFrame.h"
 #include "utf8.hpp"
 #include "LuaBinding/LuaWrapper.hpp"
+#include "LuaBinding/lua_utility.hpp"
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
@@ -1188,17 +1189,19 @@ namespace DirectWrite
 		static int api_GetDebugInformation(lua_State* L)
 		{
 			FontCollection* self = Cast(L, 1);
+			lua::stack_t S(L);
 			std::stringstream ss;
 			printFontCollectionInfo(self->dwrite_font_collection.Get(), ss);
 			std::string buf(ss.str());
-			lua_push_string_view(L, buf);
+			S.push_value(buf);
 			return 1;
 		}
 
 		static int api___tostring(lua_State* L)
 		{
 			Cast(L, 1);
-			lua_pushlstring(L, ClassID.data(), ClassID.size());
+			lua::stack_t S(L);
+			S.push_value(ClassID);
 			return 1;
 		}
 		static int api___gc(lua_State* L)
@@ -1303,42 +1306,43 @@ namespace DirectWrite
 		static int api___index(lua_State* L)
 		{
 			auto* self = Cast(L, 1);
-			auto const key = luaL_check_string_view(L, 2);
+			lua::stack_t S(L);
+			auto const key = S.get_value<std::string_view>(2);
 			if (key == "left")
 			{
-				lua_push_float(L, self->left);
+				S.push_value(self->left);
 			}
 			else if (key == "top")
 			{
-				lua_push_float(L, self->top);
+				S.push_value(self->top);
 			}
 			else if (key == "width")
 			{
-				lua_push_float(L, self->width);
+				S.push_value(self->width);
 			}
 			else if (key == "widthIncludingTrailingWhitespace")
 			{
-				lua_push_float(L, self->widthIncludingTrailingWhitespace);
+				S.push_value(self->widthIncludingTrailingWhitespace);
 			}
 			else if (key == "height")
 			{
-				lua_push_float(L, self->height);
+				S.push_value(self->height);
 			}
 			else if (key == "layoutWidth")
 			{
-				lua_push_float(L, self->layoutWidth);
+				S.push_value(self->layoutWidth);
 			}
 			else if (key == "layoutHeight")
 			{
-				lua_push_float(L, self->layoutHeight);
+				S.push_value(self->layoutHeight);
 			}
 			else if (key == "maxBidiReorderingDepth")
 			{
-				lua_push_uint32(L, self->maxBidiReorderingDepth);
+				S.push_value(self->maxBidiReorderingDepth);
 			}
 			else if (key == "lineCount")
 			{
-				lua_push_uint32(L, self->lineCount);
+				S.push_value(self->lineCount);
 			}
 			else
 			{
@@ -1349,42 +1353,43 @@ namespace DirectWrite
 		static int api___newindex(lua_State* L)
 		{
 			auto* self = Cast(L, 1);
-			auto const key = luaL_check_string_view(L, 2);
+			lua::stack_t S(L);
+			auto const key = S.get_value<std::string_view>(2);
 			if (key == "left")
 			{
-				self->left = luaL_check_float(L, 3);
+				self->left = S.get_value<float>(3);
 			}
 			else if (key == "top")
 			{
-				self->top = luaL_check_float(L, 3);
+				self->top = S.get_value<float>(3);
 			}
 			else if (key == "width")
 			{
-				self->width = luaL_check_float(L, 3);
+				self->width = S.get_value<float>(3);
 			}
 			else if (key == "widthIncludingTrailingWhitespace")
 			{
-				self->widthIncludingTrailingWhitespace = luaL_check_float(L, 3);
+				self->widthIncludingTrailingWhitespace = S.get_value<float>(3);
 			}
 			else if (key == "height")
 			{
-				self->height = luaL_check_float(L, 3);
+				self->height = S.get_value<float>(3);
 			}
 			else if (key == "layoutWidth")
 			{
-				self->layoutWidth = luaL_check_float(L, 3);
+				self->layoutWidth = S.get_value<float>(3);
 			}
 			else if (key == "layoutHeight")
 			{
-				self->layoutHeight = luaL_check_float(L, 3);
+				self->layoutHeight = S.get_value<float>(3);
 			}
 			else if (key == "maxBidiReorderingDepth")
 			{
-				self->maxBidiReorderingDepth = luaL_check_uint32(L, 3);
+				self->maxBidiReorderingDepth = S.get_value<uint32_t>(3);
 			}
 			else if (key == "lineCount")
 			{
-				self->lineCount = luaL_check_uint32(L, 3);
+				self->lineCount = S.get_value<uint32_t>(3);
 			}
 			else
 			{
@@ -1443,22 +1448,23 @@ namespace DirectWrite
 		static int api___index(lua_State* L)
 		{
 			auto* self = Cast(L, 1);
-			auto const key = luaL_check_string_view(L, 2);
+			lua::stack_t S(L);
+			auto const key = S.get_value<std::string_view>(2);
 			if (key == "left")
 			{
-				lua_push_float(L, self->left);
+				S.push_value(self->left);
 			}
 			else if (key == "top")
 			{
-				lua_push_float(L, self->top);
+				S.push_value(self->top);
 			}
 			else if (key == "right")
 			{
-				lua_push_float(L, self->right);
+				S.push_value(self->right);
 			}
 			else if (key == "bottom")
 			{
-				lua_push_float(L, self->bottom);
+				S.push_value(self->bottom);
 			}
 			else
 			{
@@ -1469,8 +1475,9 @@ namespace DirectWrite
 		static int api___newindex(lua_State* L)
 		{
 			auto* self = Cast(L, 1);
-			auto const key = luaL_check_string_view(L, 2);
-			auto const value = luaL_check_float(L, 3);
+			lua::stack_t S(L);
+			auto const key = S.get_value<std::string_view>(2);
+			auto const value = S.get_value<float>(3);
 			if (key == "left")
 			{
 				self->left = value;
