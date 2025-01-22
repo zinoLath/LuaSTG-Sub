@@ -335,15 +335,15 @@ namespace lua
 
 		// type
 
-		bool is_value(stack_index_t const index) const { return lua_type(L, index.value) != LUA_TNONE; }
-		bool is_nil(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TNIL; }
-		bool is_boolean(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TBOOLEAN; }
-		bool is_number(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TNUMBER; }
-		bool is_string(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TSTRING; }
-		bool is_table(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TTABLE; }
-		bool is_function(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TFUNCTION; }
-		bool is_userdata(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TUSERDATA; }
-		bool is_light_userdata(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TLIGHTUSERDATA; }
+		[[nodiscard]] bool is_value(stack_index_t const index) const { return lua_type(L, index.value) != LUA_TNONE; }
+		[[nodiscard]] bool is_nil(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TNIL; }
+		[[nodiscard]] bool is_boolean(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TBOOLEAN; }
+		[[nodiscard]] bool is_number(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TNUMBER; }
+		[[nodiscard]] bool is_string(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TSTRING; }
+		[[nodiscard]] bool is_table(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TTABLE; }
+		[[nodiscard]] bool is_function(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TFUNCTION; }
+		[[nodiscard]] bool is_userdata(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TUSERDATA; }
+		[[nodiscard]] bool is_light_userdata(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TLIGHTUSERDATA; }
 
 		// package system
 
