@@ -18,23 +18,6 @@ inline uint8_t lua_to_uint8_boolean(lua_State* L, int idx)
 	return lua_toboolean(L, idx) != 0;
 }
 
-inline uint32_t luaL_checki_uint32(lua_State* L, int idx)
-{
-	return (uint32_t)luaL_checkinteger(L, idx);
-}
-inline uint32_t luaL_checkf_uint32(lua_State* L, int idx)
-{
-	return (uint32_t)luaL_checknumber(L, idx);
-}
-inline void lua_pushi_uint32(lua_State* L, uint32_t v)
-{
-	lua_pushinteger(L, (lua_Integer)v);
-}
-inline void lua_pushf_uint32(lua_State* L, uint32_t v)
-{
-	lua_pushnumber(L, (lua_Number)v);
-}
-
 namespace lua
 {
 	struct stack_index_t
@@ -72,86 +55,65 @@ namespace lua
 
 	struct stack_t
 	{
-		lua_State*& L;
+		lua_State* L{};
 
-		inline stack_t(lua_State*& state) : L(state) {}
+		explicit stack_t(lua_State*& state) : L(state) {}
 		
 		// lua stack
 
-		inline stack_index_t index_of_top() { return lua_gettop(L); }
+		[[nodiscard]] stack_index_t index_of_top() const { return lua_gettop(L); }
 
-		inline void pop_value() { lua_pop(L, 1); }
-
-		inline void pop_values(int32_t count) { lua_pop(L, count); }
+		void pop_value(int32_t const count = 1) const { lua_pop(L, 1); }
 
 		// C -> lua
 
 		template<typename T>
-		inline void push_value(T value) { typename T::__invalid_type__ _{}; }
-
-		template<>
-		inline void push_value(std::nullopt_t) { lua_pushnil(L); }
-
-		template<>
-		inline void push_value(bool value) { lua_pushboolean(L, value); }
-
-		template<>
-		inline void push_value(std::string_view value) { lua_pushlstring(L, value.data(), value.size()); }
-
-		template<>
-		inline void push_value(std::string value) { lua_pushlstring(L, value.data(), value.size()); }
-
-		template<>
-		inline void push_value(int32_t value) { lua_pushinteger(L, value); }
-
-		template<>
-		inline void push_value(uint32_t value)
-		{
-			constexpr uint32_t const int32_max = static_cast<uint32_t>(std::numeric_limits<int32_t>::max());
-			bool const value_condition = value <= int32_max;
-			constexpr bool const size_condition = sizeof(lua_Integer) > sizeof(uint32_t);
-			if (size_condition || value_condition)
-			{
-				lua_pushinteger(L, static_cast<lua_Integer>(value));
+		void push_value(T const& value) {
+			if constexpr (std::is_same_v<T, std::nullopt_t>) {
+				lua_pushnil(L);
 			}
-			else if constexpr (sizeof(lua_Number) >= sizeof(double))
-			{
-				lua_pushnumber(L, (lua_Number)value);
+			else if constexpr (std::is_same_v<T, bool>) {
+				lua_pushboolean(L, value);
 			}
-			else
-			{
-				assert(false);
-				lua_pushnumber(L, (lua_Number)value);
+			else if constexpr (std::is_same_v<T, int32_t>) {
+				lua_pushinteger(L, value);
 			}
-		}
-
-		template<>
-		inline void push_value(float value) { lua_pushnumber(L, value); }
-
-		template<>
-		inline void push_value(double value)
-		{
-			if constexpr (sizeof(lua_Number) >= sizeof(double))
-			{
+			else if constexpr (std::is_same_v<T, uint32_t>) {
+				static_assert(std::is_same_v<double, lua_Number>);
+				if (value > static_cast<uint32_t>(std::numeric_limits<int32_t>::max())) {
+					lua_pushnumber(L, value);
+				} else {
+					lua_pushinteger(L, static_cast<int32_t>(value));
+				}
+			}
+			else if constexpr (std::is_same_v<T, float>) {
 				lua_pushnumber(L, value);
 			}
-			else
-			{
-				assert(false);
-				lua_pushnumber(L, (lua_Number)value);
+			else if constexpr (std::is_same_v<T, double>) {
+				static_assert(std::is_same_v<double, lua_Number>);
+				lua_pushnumber(L, value);
+			}
+			else if constexpr (std::is_same_v<T, std::string_view>) {
+				lua_pushlstring(L, value.data(), value.size());
+			}
+			else if constexpr (std::is_same_v<T, std::string>) {
+				lua_pushlstring(L, value.c_str(), value.length());
+			}
+			else if constexpr (std::is_same_v<T, stack_index_t>) {
+				lua_pushvalue(L, value.value);
+			}
+			else if constexpr (std::is_same_v<T, lua_CFunction>) {
+				lua_pushcfunction(L, value);
+			}
+			else {
+				static_assert(false, "FIXME");
 			}
 		}
-
-		template<>
-		inline void push_value(lua_CFunction value) { lua_pushcfunction(L, value); }
-		
-		template<>
-		inline void push_value(stack_index_t index) { lua_pushvalue(L, index.value); }
 
 		// C -> lua, struct
 
 		template<typename T>
-		inline void push_vector2(T x, T y)
+		void push_vector2(T x, T y)
 		{
 			auto const idx = create_map(2);
 			set_map_value(idx, "x", x);
@@ -159,7 +121,7 @@ namespace lua
 		}
 
 		template<typename T>
-		inline void push_vector2(T vec2)
+		void push_vector2(T vec2)
 		{
 			auto const idx = create_map(2);
 			set_map_value(idx, "x", vec2.x);
@@ -244,16 +206,6 @@ namespace lua
 		}
 
 		// lua -> C
-
-		template<typename T>
-		T get_value_or(stack_index_t index, T const default_value) {
-			if constexpr (std::is_same_v<uint32_t, T>) {
-				return static_cast<uint32_t>(luaL_optnumber(L, index.value, static_cast<lua_Number>(default_value)));
-			}
-			else {
-				static_assert(false, "not implemented");
-			}
-		}
 
 		template<typename T>
 		inline T get_value(stack_index_t index) { typename T::__invalid_type__ _{}; }
@@ -348,16 +300,30 @@ namespace lua
 		// lua -> C (with default value)
 
 		template<typename T>
-		inline T get_value(stack_index_t index, T default_value) { typename T::__invalid_type__ _{}; }
-
-		template<>
-		inline bool get_value(stack_index_t index, bool default_value) { if (is_value(index)) return lua_toboolean(L, index.value); else return default_value; }
-
-		template<>
-		inline float get_value(stack_index_t index, float default_value) { if (is_value(index)) return (float)luaL_checknumber(L, index.value); else return default_value; }
-
-		template<>
-		inline double get_value(stack_index_t index, double default_value) { if (is_value(index)) return luaL_checknumber(L, index.value); else return default_value; }
+		T get_value(stack_index_t const index, T const& default_value) {
+			if constexpr (std::is_same_v<T, bool>) {
+				if (is_value(index))
+					return lua_toboolean(L, index.value);
+				return default_value;
+			}
+			else if constexpr (std::is_same_v<T, uint32_t>) {
+				return static_cast<uint32_t>(luaL_optnumber(L, index.value, static_cast<lua_Number>(default_value)));
+			}
+			else if constexpr (std::is_same_v<T, float>) {
+				if (is_value(index))
+					return static_cast<float>(luaL_checknumber(L, index.value));
+				return default_value;
+			}
+			else if constexpr (std::is_same_v<T, double>) {
+				if (is_value(index))
+					return luaL_checknumber(L, index.value);
+				return default_value;
+			}
+			else {
+				static_assert(false, "FIXME");
+				return {};
+			}
+		}
 
 		// userdata
 
@@ -369,15 +335,15 @@ namespace lua
 
 		// type
 
-		inline bool is_value(stack_index_t index) { return lua_type(L, index.value) != LUA_TNONE; }
-		inline bool is_nil(stack_index_t index) { return lua_type(L, index.value) == LUA_TNIL; }
-		inline bool is_boolean(stack_index_t index) { return lua_type(L, index.value) == LUA_TBOOLEAN; }
-		inline bool is_number(stack_index_t index) { return lua_type(L, index.value) == LUA_TNUMBER; }
-		inline bool is_string(stack_index_t index) { return lua_type(L, index.value) == LUA_TSTRING; }
-		inline bool is_table(stack_index_t index) { return lua_type(L, index.value) == LUA_TTABLE; }
-		inline bool is_function(stack_index_t index) { return lua_type(L, index.value) == LUA_TFUNCTION; }
-		inline bool is_userdata(stack_index_t index) { return lua_type(L, index.value) == LUA_TUSERDATA; }
-		inline bool is_light_userdata(stack_index_t index) { return lua_type(L, index.value) == LUA_TLIGHTUSERDATA; }
+		bool is_value(stack_index_t const index) const { return lua_type(L, index.value) != LUA_TNONE; }
+		bool is_nil(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TNIL; }
+		bool is_boolean(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TBOOLEAN; }
+		bool is_number(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TNUMBER; }
+		bool is_string(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TSTRING; }
+		bool is_table(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TTABLE; }
+		bool is_function(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TFUNCTION; }
+		bool is_userdata(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TUSERDATA; }
+		bool is_light_userdata(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TLIGHTUSERDATA; }
 
 		// package system
 
@@ -417,7 +383,7 @@ namespace lua
 			auto const mt_index = index_of_top();
 			auto const ref_index = push_metatable(name);
 			int const result = lua_rawequal(L, mt_index.value, ref_index.value);
-			pop_values(2);
+			pop_value(2);
 			return !!result;
 		}
 

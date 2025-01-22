@@ -430,8 +430,8 @@ namespace LuaSTG::Sub::LuaBinding {
 		static int remove(lua_State* L) {
 			lua::stack_t S(L);
 			auto self = as(L, 1);
-			auto const idx = S.get_value_or<uint32_t>(2, self->data->textInput_getCursorPosition());
-			auto const cnt = S.get_value_or<uint32_t>(3, 1);
+			auto const idx = S.get_value<uint32_t>(2, self->data->textInput_getCursorPosition());
+			auto const cnt = S.get_value<uint32_t>(3, 1);
 			self->data->textInput_removeBufferRange(idx, cnt);
 			return 0;
 		}
@@ -439,7 +439,7 @@ namespace LuaSTG::Sub::LuaBinding {
 		static int backspace(lua_State* L) {
 			lua::stack_t S(L);
 			auto self = as(L, 1);
-			auto const count = S.get_value_or<uint32_t>(2, 1);
+			auto const count = S.get_value<uint32_t>(2, 1);
 			self->data->textInput_backspace(count);
 			return 0;
 		}
