@@ -44,13 +44,18 @@ namespace lua
 		}
 	};
 
-	struct stack_balancer_t
-	{
-		lua_State*& L;
-		int N;
-
-		inline stack_balancer_t(lua_State*& state) : L(state), N(lua_gettop(state)) {}
-		inline ~stack_balancer_t() { lua_settop(L, N); }
+	class stack_balancer_t {
+	public:
+		stack_balancer_t() = delete;
+		stack_balancer_t(stack_balancer_t const&) = delete;
+		stack_balancer_t(stack_balancer_t&&) = delete;
+		explicit stack_balancer_t(lua_State* const state) : L(state), N(lua_gettop(state)) {}
+		~stack_balancer_t() { lua_settop(L, N); }
+		stack_balancer_t& operator=(stack_balancer_t const&) = delete;
+		stack_balancer_t& operator=(stack_balancer_t&&) = delete;
+	private:
+		lua_State* const L{};
+		int const N{};
 	};
 
 	struct stack_t
