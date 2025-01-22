@@ -306,6 +306,9 @@ namespace lua
 					return lua_toboolean(L, index.value);
 				return default_value;
 			}
+			else if constexpr (std::is_same_v<T, int32_t>) {
+				return static_cast<int32_t>(luaL_optinteger(L, index.value, default_value));
+			}
 			else if constexpr (std::is_same_v<T, uint32_t>) {
 				return static_cast<uint32_t>(luaL_optnumber(L, index.value, static_cast<lua_Number>(default_value)));
 			}
@@ -328,10 +331,7 @@ namespace lua
 		// userdata
 
 		template<typename T>
-		inline T* create_userdata()
-		{
-			return static_cast<T*>(lua_newuserdata(L, sizeof(T)));
-		}
+		T* create_userdata() { return static_cast<T*>(lua_newuserdata(L, sizeof(T))); }
 
 		// type
 
