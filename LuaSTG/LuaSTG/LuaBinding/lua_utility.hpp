@@ -63,7 +63,7 @@ namespace lua
 
 		[[nodiscard]] stack_index_t index_of_top() const { return lua_gettop(L); }
 
-		void pop_value(int32_t const count = 1) const { lua_pop(L, 1); }
+		void pop_value(int32_t const count = 1) const { lua_pop(L, count); }
 
 		// C -> lua
 
