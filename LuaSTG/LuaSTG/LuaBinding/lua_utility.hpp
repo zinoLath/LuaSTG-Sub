@@ -292,9 +292,9 @@ namespace lua
 		{
 			push_value(key);
 			lua_gettable(L, index.value);
-			auto const has_value = has_value(-1) && !is_nil(-1);
+			auto const r = has_value(-1) && !is_nil(-1);
 			pop_value();
-			return has_value;
+			return r;
 		}
 
 		// lua -> C (with default value)
