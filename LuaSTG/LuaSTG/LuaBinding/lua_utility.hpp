@@ -35,11 +35,6 @@ inline void lua_pushf_uint32(lua_State* L, uint32_t v)
 	lua_pushnumber(L, (lua_Number)v);
 }
 
-inline float luaL_check_float(lua_State* L, int idx)
-{
-	return (float)luaL_checknumber(L, idx);
-}
-
 namespace lua
 {
 	struct stack_index_t

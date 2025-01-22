@@ -75,33 +75,36 @@ namespace LuaSTGPlus::LuaWrapper
 			}
 			static int setVertex(lua_State* L) noexcept
 			{
+				lua::stack_t S(L);
 				Mesh* self = Cast(L, 1);
 				uint32_t const index = luaL_checki_uint32(L, 2);
-				float const x = luaL_check_float(L, 3);
-				float const y = luaL_check_float(L, 4);
-				float const z = luaL_check_float(L, 5);
-				float const u = luaL_check_float(L, 6);
-				float const v = luaL_check_float(L, 7);
+				float const x = S.get_value<float>(3);
+				float const y = S.get_value<float>(4);
+				float const z = S.get_value<float>(5);
+				float const u = S.get_value<float>(6);
+				float const v = S.get_value<float>(7);
 				Core::Color4B const color(to_color32(L, 8));
 				self->setVertex(index, x, y, z, u, v, color);
 				return 0;
 			}
 			static int setVertexPosition(lua_State* L) noexcept
 			{
+				lua::stack_t S(L);
 				Mesh* self = Cast(L, 1);
 				uint32_t const index = luaL_checki_uint32(L, 2);
-				float const x = luaL_check_float(L, 3);
-				float const y = luaL_check_float(L, 4);
-				float const z = luaL_check_float(L, 5);
+				float const x = S.get_value<float>(3);
+				float const y = S.get_value<float>(4);
+				float const z = S.get_value<float>(5);
 				self->setVertexPosition(index, x, y, z);
 				return 0;
 			}
 			static int setVertexCoords(lua_State* L) noexcept
 			{
+				lua::stack_t S(L);
 				Mesh* self = Cast(L, 1);
 				uint32_t const index = luaL_checki_uint32(L, 2);
-				float const u = luaL_check_float(L, 3);
-				float const v = luaL_check_float(L, 4);
+				float const u = S.get_value<float>(3);
+				float const v = S.get_value<float>(4);
 				self->setVertexCoords(index, u, v);
 				return 0;
 			}
