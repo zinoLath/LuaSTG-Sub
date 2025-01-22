@@ -25,22 +25,22 @@ namespace lua
 		int32_t value{};
 
 		stack_index_t() = default;
-		stack_index_t(int32_t index) : value(index) {};
+		stack_index_t(int32_t const index) : value(index) {}
 
-		inline bool operator>(int r) {
-			return value > r;
+		bool operator>(int32_t const right) const {
+			return value > right;
 		}
-		inline bool operator>=(int r) {
-			return value >= r;
+		bool operator>=(int32_t const right) const {
+			return value >= right;
 		}
-		inline bool operator<(int r) {
-			return value < r;
+		bool operator<(int32_t const right) const {
+			return value < right;
 		}
-		inline bool operator<=(int r) {
-			return value <= r;
+		bool operator<=(int32_t const right) const {
+			return value <= right;
 		}
-		inline bool operator==(int r) {
-			return value == r;
+		bool operator==(int32_t const right) const {
+			return value == right;
 		}
 	};
 
