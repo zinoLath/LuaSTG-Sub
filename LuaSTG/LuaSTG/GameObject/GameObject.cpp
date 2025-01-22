@@ -959,13 +959,13 @@ namespace LuaSTGPlus
 			} while (false);
 			return 1;
 		case LuaSTG::GameObjectMember::BOUND:
-			bound = lua_to_uint8_boolean(L, 3);
+			bound = lua_toboolean(L, 3);
 			return 0;
 		case LuaSTG::GameObjectMember::COLLI:
-			colli = lua_to_uint8_boolean(L, 3);
+			colli = lua_toboolean(L, 3);
 			return 0;
 		case LuaSTG::GameObjectMember::RECT:
-			rect = lua_to_uint8_boolean(L, 3);
+			rect = lua_toboolean(L, 3);
 			UpdateCollisionCircleRadius();
 			return 0;
 		case LuaSTG::GameObjectMember::A:
@@ -1052,10 +1052,10 @@ namespace LuaSTGPlus
 		case LuaSTG::GameObjectMember::ANI:
 			return luaL_error(L, "property 'ani' is readonly.");
 		case LuaSTG::GameObjectMember::HIDE:
-			hide = lua_to_uint8_boolean(L, 3);
+			hide = lua_toboolean(L, 3);
 			return 0;
 		case LuaSTG::GameObjectMember::NAVI:
-			navi = lua_to_uint8_boolean(L, 3);
+			navi = lua_toboolean(L, 3);
 			return 0;
 		case LuaSTG::GameObjectMember::IMG:
 			do {
@@ -1097,11 +1097,11 @@ namespace LuaSTGPlus
 			pause = luaL_checkinteger(L, 3);
 			return 0;
 		case LuaSTG::GameObjectMember::RESOLVEMOVE:
-			resolve_move = lua_to_uint8_boolean(L, 3);
+			resolve_move = lua_toboolean(L, 3);
 			return 0;
 		#endif
 		case LuaSTG::GameObjectMember::IGNORESUPERPAUSE:
-			ignore_superpause = lua_to_uint8_boolean(L, 3);
+			ignore_superpause = lua_toboolean(L, 3);
 			return 0;
 		
 			// 默认处理
