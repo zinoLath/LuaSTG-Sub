@@ -93,28 +93,9 @@ namespace DirectWrite
 	// lua helper
 
 	template<typename E>
-	inline E luaL_check_C_enum(lua_State* L, int idx)
+	E luaL_check_C_enum(lua_State* L, int idx)
 	{
 		return static_cast<E>(luaL_checkinteger(L, idx));
-	}
-
-	inline uint32_t luaL_check_uint32(lua_State* L, int idx)
-	{
-		if constexpr (sizeof(lua_Integer) >= 8)
-		{
-			return 0xFFFFFFFFu & luaL_checkinteger(L, idx);
-		}
-		else
-		{
-			return (uint32_t)luaL_checknumber(L, idx);
-		}
-	}
-	inline void lua_push_uint32(lua_State* L, uint32_t v)
-	{
-		if (v <= 0x7FFFFFFFu)
-			lua_pushinteger(L, static_cast<lua_Integer>(v));
-		else
-			lua_pushnumber(L, (lua_Number)v);
 	}
 
 	// DirectWrite helper
@@ -1532,9 +1513,10 @@ namespace DirectWrite
 		static int api_SetFontCollection(lua_State* L)
 		{
 			auto* self = Cast(L, 1);
+			lua::stack_t S(L);
 			auto* font_collection = FontCollection::Cast(L, 2);
-			auto const position = luaL_check_uint32(L, 3);
-			auto const length = luaL_check_uint32(L, 4);
+			auto const position = S.get_value<uint32_t>(3);
+			auto const length = S.get_value<uint32_t>(4);
 
 			HRESULT hr = gHR = self->dwrite_text_layout->SetFontCollection(
 				font_collection->dwrite_font_collection.Get(),
@@ -1552,8 +1534,8 @@ namespace DirectWrite
 			auto* self = Cast(L, 1);
 			lua::stack_t S(L);
 			auto const font_family_name = S.get_value<std::string_view>(2);
-			auto const position = luaL_check_uint32(L, 3);
-			auto const length = luaL_check_uint32(L, 4);
+			auto const position = S.get_value<uint32_t>(3);
+			auto const length = S.get_value<uint32_t>(4);
 
 			std::wstring wide_font_family_name(utf8::to_wstring(font_family_name));
 
@@ -1573,8 +1555,8 @@ namespace DirectWrite
 			auto* self = Cast(L, 1);
 			lua::stack_t S(L);
 			auto const locale_name = S.get_value<std::string_view>(2);
-			auto const position = luaL_check_uint32(L, 3);
-			auto const length = luaL_check_uint32(L, 4);
+			auto const position = S.get_value<uint32_t>(3);
+			auto const length = S.get_value<uint32_t>(4);
 
 			std::wstring wide_locale_name(utf8::to_wstring(locale_name));
 
@@ -1594,8 +1576,8 @@ namespace DirectWrite
 			auto* self = Cast(L, 1);
 			lua::stack_t S(L);
 			auto const font_size = S.get_value<float>(2);
-			auto const position = luaL_check_uint32(L, 3);
-			auto const length = luaL_check_uint32(L, 4);
+			auto const position = S.get_value<uint32_t>(3);
+			auto const length = S.get_value<uint32_t>(4);
 
 			HRESULT hr = gHR = self->dwrite_text_layout->SetFontSize(
 				font_size,
@@ -1611,9 +1593,10 @@ namespace DirectWrite
 		static int api_SetFontStyle(lua_State* L)
 		{
 			auto* self = Cast(L, 1);
+			lua::stack_t S(L);
 			auto const font_style = luaL_check_C_enum<DWRITE_FONT_STYLE>(L, 2);
-			auto const position = luaL_check_uint32(L, 3);
-			auto const length = luaL_check_uint32(L, 4);
+			auto const position = S.get_value<uint32_t>(3);
+			auto const length = S.get_value<uint32_t>(4);
 
 			HRESULT hr = gHR = self->dwrite_text_layout->SetFontStyle(
 				font_style,
@@ -1629,9 +1612,10 @@ namespace DirectWrite
 		static int api_SetFontWeight(lua_State* L)
 		{
 			auto* self = Cast(L, 1);
+			lua::stack_t S(L);
 			auto const font_weight = luaL_check_C_enum<DWRITE_FONT_WEIGHT>(L, 2);
-			auto const position = luaL_check_uint32(L, 3);
-			auto const length = luaL_check_uint32(L, 4);
+			auto const position = S.get_value<uint32_t>(3);
+			auto const length = S.get_value<uint32_t>(4);
 
 			HRESULT hr = gHR = self->dwrite_text_layout->SetFontWeight(
 				font_weight,
@@ -1647,9 +1631,10 @@ namespace DirectWrite
 		static int api_SetFontStretch(lua_State* L)
 		{
 			auto* self = Cast(L, 1);
+			lua::stack_t S(L);
 			auto const font_stretch = luaL_check_C_enum<DWRITE_FONT_STRETCH>(L, 2);
-			auto const position = luaL_check_uint32(L, 3);
-			auto const length = luaL_check_uint32(L, 4);
+			auto const position = S.get_value<uint32_t>(3);
+			auto const length = S.get_value<uint32_t>(4);
 
 			HRESULT hr = gHR = self->dwrite_text_layout->SetFontStretch(
 				font_stretch,
@@ -1668,8 +1653,8 @@ namespace DirectWrite
 			auto* self = Cast(L, 1);
 			lua::stack_t S(L);
 			auto const enable = S.get_value<bool>(2);
-			auto const position = luaL_check_uint32(L, 3);
-			auto const length = luaL_check_uint32(L, 4);
+			auto const position = S.get_value<uint32_t>(3);
+			auto const length = S.get_value<uint32_t>(4);
 
 			HRESULT hr = gHR = self->dwrite_text_layout->SetStrikethrough(
 				enable,
@@ -1687,8 +1672,8 @@ namespace DirectWrite
 			auto* self = Cast(L, 1);
 			lua::stack_t S(L);
 			auto const enable = S.get_value<bool>(2);
-			auto const position = luaL_check_uint32(L, 3);
-			auto const length = luaL_check_uint32(L, 4);
+			auto const position = S.get_value<uint32_t>(3);
+			auto const length = S.get_value<uint32_t>(4);
 
 			HRESULT hr = gHR = self->dwrite_text_layout->SetUnderline(
 				enable,
