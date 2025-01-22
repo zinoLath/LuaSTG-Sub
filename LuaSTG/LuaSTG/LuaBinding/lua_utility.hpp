@@ -100,6 +100,9 @@ namespace lua
 				static_assert(std::is_same_v<double, lua_Number>);
 				lua_pushnumber(L, value);
 			}
+			else if constexpr (std::is_same_v<T, char*> || std::is_same_v<T, char const*>) {
+				static_assert(false, "FIXME");
+			}
 			else if constexpr (std::is_same_v<T, std::string_view>) {
 				lua_pushlstring(L, value.data(), value.size());
 			}
