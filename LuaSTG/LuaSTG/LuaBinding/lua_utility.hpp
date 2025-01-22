@@ -292,7 +292,7 @@ namespace lua
 		{
 			push_value(key);
 			lua_gettable(L, index.value);
-			auto const has_value = is_value(-1) && !is_nil(-1);
+			auto const has_value = has_value(-1) && !is_nil(-1);
 			pop_value();
 			return has_value;
 		}
@@ -302,7 +302,7 @@ namespace lua
 		template<typename T>
 		T get_value(stack_index_t const index, T const& default_value) {
 			if constexpr (std::is_same_v<T, bool>) {
-				if (is_value(index))
+				if (has_value(index))
 					return lua_toboolean(L, index.value);
 				return default_value;
 			}
@@ -313,12 +313,12 @@ namespace lua
 				return static_cast<uint32_t>(luaL_optnumber(L, index.value, static_cast<lua_Number>(default_value)));
 			}
 			else if constexpr (std::is_same_v<T, float>) {
-				if (is_value(index))
+				if (has_value(index))
 					return static_cast<float>(luaL_checknumber(L, index.value));
 				return default_value;
 			}
 			else if constexpr (std::is_same_v<T, double>) {
-				if (is_value(index))
+				if (has_value(index))
 					return luaL_checknumber(L, index.value);
 				return default_value;
 			}
@@ -335,7 +335,7 @@ namespace lua
 
 		// type
 
-		[[nodiscard]] bool is_value(stack_index_t const index) const { return lua_type(L, index.value) != LUA_TNONE; }
+		[[nodiscard]] bool has_value(stack_index_t const index) const { return lua_type(L, index.value) != LUA_TNONE; }
 		[[nodiscard]] bool is_nil(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TNIL; }
 		[[nodiscard]] bool is_boolean(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TBOOLEAN; }
 		[[nodiscard]] bool is_number(stack_index_t const index) const { return lua_type(L, index.value) == LUA_TNUMBER; }
