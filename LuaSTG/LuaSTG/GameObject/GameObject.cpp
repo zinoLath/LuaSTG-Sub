@@ -610,6 +610,7 @@ namespace LuaSTGPlus
 	
 	int GameObject::GetAttr(lua_State* L) noexcept
 	{
+		lua::stack_t S(L);
 	#define return_default(L) lua_rawget(L, 1)
 		
 		// self k
@@ -624,13 +625,13 @@ namespace LuaSTGPlus
 			default:
 				return luaL_error(L, "unknown lstg object status.");
 			case GameObjectStatus::Active:
-				lua_push_string_view(L, "normal");
+				S.push_value("normal");
 				break;
 			case GameObjectStatus::Dead:
-				lua_push_string_view(L, "del");
+				S.push_value("del");
 				break;
 			case GameObjectStatus::Killed:
-				lua_push_string_view(L, "kill");
+				S.push_value("kill");
 				break;
 			}
 			return 1;
@@ -795,7 +796,7 @@ namespace LuaSTGPlus
 			return 1;
 		case LuaSTG::GameObjectMember::IMG:
 			if (res)
-				lua_push_string_view(L, res->GetResName());
+				S.push_value(res->GetResName());
 			else
 				return_default(L);
 			return 1;

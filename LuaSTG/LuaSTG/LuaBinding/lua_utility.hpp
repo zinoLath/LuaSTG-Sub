@@ -67,6 +67,13 @@ namespace lua
 
 		// C -> lua
 
+		template<size_t N>
+		void push_value(char const (& str)[N]) {
+			auto const len = str[N - 1] == '\0' ? N - 1 : N;
+			assert(std::string_view(str).length() == len);
+			lua_pushlstring(L, str, len);
+		}
+
 		template<typename T>
 		void push_value(T const& value) {
 			if constexpr (std::is_same_v<T, std::nullopt_t>) {

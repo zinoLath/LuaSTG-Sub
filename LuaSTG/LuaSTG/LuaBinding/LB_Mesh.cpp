@@ -131,8 +131,9 @@ namespace LuaSTGPlus::LuaWrapper
 			}
 			static int __tostring(lua_State* L) noexcept
 			{
+				lua::stack_t S(L);
 				std::ignore = Cast(L, 1);
-				lua_push_string_view(L, "lstg.Mesh");
+				S.push_value(ClassID);
 				return 1;
 			}
 
@@ -175,7 +176,7 @@ namespace LuaSTGPlus::LuaWrapper
 
 		luaL_newmetatable(L, ClassID.data()); // ... mt
 		luaL_register(L, NULL, mt);           // ... mt
-		lua_push_string_view(L, "__index");   // ... mt '__index'
+		lua_pushstring(L, "__index");         // ... mt '__index'
 		lua_newtable(L);                      // ... mt '__index' lib
 		luaL_register(L, NULL, lib);          // ... mt '__index' lib
 		lua_rawset(L, -3);                    // ... mt

@@ -162,6 +162,7 @@ void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept
 			return 1;
 		}
 		static int EnumGPUs(lua_State* L) {
+			lua::stack_t S(L);
 			if (LAPP.GetAppModel())
 			{
 				auto* p_device = LAPP.GetAppModel()->getDevice();
@@ -169,7 +170,7 @@ void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept
 				lua_createtable(L, count, 0);		// t
 				for (int index = 0; index < (int)count; index += 1)
 				{
-					lua_push_string_view(L, p_device->getGpuName((uint32_t)index)); // t name
+					S.push_value(p_device->getGpuName((uint32_t)index)); // t name
 					lua_rawseti(L, -2, index + 1);	// t
 				}
 				return 1;
