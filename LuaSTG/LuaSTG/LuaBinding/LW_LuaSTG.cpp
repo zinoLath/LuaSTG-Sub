@@ -88,9 +88,10 @@ void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept
 		}
 		static int Log(lua_State* L)noexcept
 		{
-			lua_Integer const level = luaL_checkinteger(L, 1);
-			std::string_view const msg = luaL_check_string_view(L, 2);
-			spdlog::log((spdlog::level::level_enum)level, "[lua] {}", msg);
+			lua::stack_t S(L);
+			auto const level = S.get_value<int32_t>(1);
+			auto const message = S.get_value<std::string_view>(2);
+			spdlog::log(static_cast<spdlog::level::level_enum>(level), "[lua] {}", message);
 			return 0;
 		}
 		static int DoFile(lua_State* L)noexcept
@@ -181,9 +182,10 @@ void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept
 			}
 		}
 		static int ChangeGPU(lua_State* L) {
+			lua::stack_t S(L);
 			if (LAPP.GetAppModel())
 			{
-				auto const gpu = luaL_check_string_view(L, 1);
+				auto const gpu = S.get_value<std::string_view>(1);
 				auto* p_device = LAPP.GetAppModel()->getDevice();
 				p_device->setPreferenceGpu(gpu);
 				if (!p_device->recreate())

@@ -614,7 +614,7 @@ namespace LuaSTGPlus
 	#define return_default(L) lua_rawget(L, 1)
 		
 		// self k
-		std::string_view const key = luaL_check_string_view(L, 2);
+		std::string_view const key = S.get_value<std::string_view>(2);
 		switch (LuaSTG::MapGameObjectMember(key.data(), key.size()))
 		{
 			// 基本信息
@@ -835,15 +835,16 @@ namespace LuaSTGPlus
 	}
 	int GameObject::SetAttr(lua_State* L) noexcept
 	{
+		lua::stack_t S(L);
 		// self k v
-		std::string_view const key = luaL_check_string_view(L, 2);
+		std::string_view const key = S.get_value<std::string_view>(2);
 		switch (LuaSTG::MapGameObjectMember(key.data(), key.size()))
 		{
 			// 基本信息
 
 		case LuaSTG::GameObjectMember::STATUS:
 			do {
-				std::string_view const value = luaL_check_string_view(L, 3);
+				std::string_view const value = S.get_value<std::string_view>(3);
 				if (value == "normal")
 					status = GameObjectStatus::Active;
 				else if (value == "del")
@@ -1062,7 +1063,7 @@ namespace LuaSTGPlus
 			do {
 				if (lua_isstring(L, 3))
 				{
-					std::string_view const value = luaL_check_string_view(L, 3);
+					std::string_view const value = S.get_value<std::string_view>(3);
 					if (!res || value != res->GetResName())
 					{
 						ReleaseLuaRC(L, 1); // TODO: 默认 table 是第一个？
