@@ -352,42 +352,38 @@ namespace lua
 
 		// package system
 
-		inline stack_index_t push_module(std::string_view name)
-		{
+		[[nodiscard]] stack_index_t push_module(std::string_view const name) const {
 			std::string const name_copy(name);
-			luaL_Reg const list[] = { {NULL, NULL} };
+			constexpr luaL_Reg list[] = { {nullptr, nullptr} };
 			luaL_register(L, name_copy.c_str(), list);
 			return index_of_top();
 		}
 
-		inline stack_index_t create_metatable(std::string_view name)
-		{
+		[[nodiscard]] stack_index_t create_metatable(std::string_view const name) const {
 			std::string const name_copy(name);
 			luaL_newmetatable(L, name_copy.c_str());
 			return index_of_top();
 		}
 
-		inline stack_index_t push_metatable(std::string_view name)
-		{
+		[[nodiscard]] stack_index_t push_metatable(std::string_view const name) const {
 			std::string const name_copy(name);
 			luaL_getmetatable(L, name_copy.c_str());
 			return index_of_top();
 		}
 
-		inline void set_metatable(stack_index_t index, std::string_view name)
-		{
+		void set_metatable(stack_index_t const index, std::string_view const name) const {
 			std::string const name_copy(name);
 			luaL_getmetatable(L, name_copy.c_str());
 			lua_setmetatable(L, index.value);
 		}
 
-		inline bool is_metatable(stack_index_t index, std::string_view name) {
+		[[nodiscard]] bool is_metatable(stack_index_t const index, std::string_view const name) const {
 			if (!lua_getmetatable(L, index.value)) {
 				return false;
 			}
 			auto const mt_index = index_of_top();
-			auto const ref_index = push_metatable(name);
-			int const result = lua_rawequal(L, mt_index.value, ref_index.value);
+			auto const named_mt_index = push_metatable(name);
+			auto const result = lua_rawequal(L, mt_index.value, named_mt_index.value);
 			pop_value(2);
 			return !!result;
 		}
