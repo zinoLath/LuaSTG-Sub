@@ -213,24 +213,65 @@ namespace lua
 		// lua -> C
 
 		template<typename T>
-		inline T get_value(stack_index_t index) { typename T::__invalid_type__ _{}; }
+		T get_value(stack_index_t const index) {
+			if constexpr  (std::is_same_v<T, bool>) {
+				return lua_toboolean(L, index.value);
+			}
+			else if constexpr (std::is_same_v<T, int32_t>) {
+				return static_cast<int32_t>(luaL_checkinteger(L, index.value));
+			}
+			else if constexpr (std::is_same_v<T, uint32_t>) {
+				return static_cast<uint32_t>(luaL_checknumber(L, index.value));
+			}
+			else if constexpr (std::is_same_v<T, float>) {
+				return static_cast<float>(luaL_checknumber(L, index.value));
+			}
+			else if constexpr (std::is_same_v<T, double>) {
+				return luaL_checknumber(L, index.value);
+			}
+			else if constexpr (std::is_same_v<T, std::string_view>) {
+				size_t len = 0;
+				char const* str = luaL_checklstring(L, index.value, &len);
+				return { str, len };
+			}
+			else if constexpr (std::is_same_v<T, std::string>) {
+				size_t len = 0;
+				char const* str = luaL_checklstring(L, index.value, &len);
+				return { str, len };
+			}
+			else {
+				static_assert(false, "FIXME");
+				return {};
+			}
+		}
 
-		template<>
-		inline bool get_value(stack_index_t index) { return lua_toboolean(L, index.value); }
+		// lua -> C (with default value)
 
-		template<>
-		inline int32_t get_value(stack_index_t index) { return (int32_t)luaL_checkinteger(L, index.value); }
+		template<typename T>
+		T get_value(stack_index_t const index, T const& default_value) {
+			if constexpr (std::is_same_v<T, bool>) {
+				if (has_value(index))
+					return lua_toboolean(L, index.value);
+				return default_value;
+			} else if constexpr (std::is_same_v<T, int32_t>) {
+				return static_cast<int32_t>(luaL_optinteger(L, index.value, default_value));
+			} else if constexpr (std::is_same_v<T, uint32_t>) {
+				return static_cast<uint32_t>(luaL_optnumber(L, index.value, static_cast<lua_Number>(default_value)));
+			} else if constexpr (std::is_same_v<T, float>) {
+				if (has_value(index))
+					return static_cast<float>(luaL_checknumber(L, index.value));
+				return default_value;
+			} else if constexpr (std::is_same_v<T, double>) {
+				if (has_value(index))
+					return luaL_checknumber(L, index.value);
+				return default_value;
+			} else {
+				static_assert(false, "FIXME");
+				return {};
+			}
+		}
 
-		template<>
-		inline uint32_t get_value(stack_index_t index) { return (uint32_t)luaL_checknumber(L, index.value); }
-
-		template<>
-		inline float get_value(stack_index_t index) { return (float)luaL_checknumber(L, index.value); }
-		template<>
-		inline double get_value(stack_index_t index) { return luaL_checknumber(L, index.value); }
-
-		template<>
-		inline std::string_view get_value(stack_index_t index) { size_t len = 0; char const* str = luaL_checklstring(L, index.value, &len); return { str, len }; }
+		// array & map
 
 		template<typename T>
 		inline T get_array_value(stack_index_t array_index, stack_index_t lua_index) { typename T::__invalid_type__ _{}; }
@@ -300,37 +341,6 @@ namespace lua
 			auto const r = has_value(-1) && !is_nil(-1);
 			pop_value();
 			return r;
-		}
-
-		// lua -> C (with default value)
-
-		template<typename T>
-		T get_value(stack_index_t const index, T const& default_value) {
-			if constexpr (std::is_same_v<T, bool>) {
-				if (has_value(index))
-					return lua_toboolean(L, index.value);
-				return default_value;
-			}
-			else if constexpr (std::is_same_v<T, int32_t>) {
-				return static_cast<int32_t>(luaL_optinteger(L, index.value, default_value));
-			}
-			else if constexpr (std::is_same_v<T, uint32_t>) {
-				return static_cast<uint32_t>(luaL_optnumber(L, index.value, static_cast<lua_Number>(default_value)));
-			}
-			else if constexpr (std::is_same_v<T, float>) {
-				if (has_value(index))
-					return static_cast<float>(luaL_checknumber(L, index.value));
-				return default_value;
-			}
-			else if constexpr (std::is_same_v<T, double>) {
-				if (has_value(index))
-					return luaL_checknumber(L, index.value);
-				return default_value;
-			}
-			else {
-				static_assert(false, "FIXME");
-				return {};
-			}
 		}
 
 		// userdata
