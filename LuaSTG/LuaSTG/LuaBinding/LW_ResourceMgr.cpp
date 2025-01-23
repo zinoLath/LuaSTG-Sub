@@ -1,5 +1,5 @@
 #include "LuaBinding/LuaWrapper.hpp"
-#include "LuaBinding/lua_utility.hpp"
+#include "lua/plus.hpp"
 #include "Core/FileManager.hpp"
 #include "AppFrame.h"
 

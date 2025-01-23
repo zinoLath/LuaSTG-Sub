@@ -1,5 +1,5 @@
 #include "LuaBinding/LuaWrapper.hpp"
-#include "LuaBinding/lua_utility.hpp"
+#include "lua/plus.hpp"
 #include "AppFrame.h"
 
 inline Core::RectI lua_to_Core_RectI(lua_State* L, int idx)

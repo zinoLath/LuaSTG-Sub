@@ -1,5 +1,5 @@
 ﻿#include "LuaBinding/LuaWrapper.hpp"
-#include "LuaBinding/lua_utility.hpp"
+#include "lua/plus.hpp"
 
 inline void lua_push_vec2(lua_State* L, Core::Vector2F const& v)
 {

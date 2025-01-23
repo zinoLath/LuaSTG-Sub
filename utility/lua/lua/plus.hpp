@@ -1,11 +1,12 @@
 #pragma once
+
+#include <string>
 #include <string_view>
+#include <optional>
 #include "lua.hpp"
 
-namespace lua
-{
-	struct stack_index_t
-	{
+namespace lua {
+	struct stack_index_t {
 		int32_t value{};
 
 		stack_index_t() = default;
@@ -42,12 +43,11 @@ namespace lua
 		int const N{};
 	};
 
-	struct stack_t
-	{
+	struct stack_t {
 		lua_State* L{};
 
 		explicit stack_t(lua_State*& state) : L(state) {}
-		
+
 		// lua stack
 
 		[[nodiscard]] stack_index_t index_of_top() const { return lua_gettop(L); }
@@ -57,10 +57,13 @@ namespace lua
 		// C -> lua
 
 		template<size_t N>
-		void push_value(char const (& str)[N]) {
-			auto const len = str[N - 1] == '\0' ? N - 1 : N;
-			assert(std::string_view(str).length() == len);
-			lua_pushlstring(L, str, len);
+		void push_value(char const (&str)[N]) {
+			for (size_t len = N - 1; len > 0; len -= 1) {
+				if (str[len] != '\0') {
+					lua_pushlstring(L, str, len + 1);
+				}
+			}
+			lua_pushlstring(L, str, 0);
 		}
 
 		template<typename T>
@@ -78,7 +81,8 @@ namespace lua
 				static_assert(std::is_same_v<double, lua_Number>);
 				if (value > static_cast<uint32_t>(std::numeric_limits<int32_t>::max())) {
 					lua_pushnumber(L, value);
-				} else {
+				}
+				else {
 					lua_pushinteger(L, static_cast<int32_t>(value));
 				}
 			}
@@ -112,16 +116,14 @@ namespace lua
 		// C -> lua, struct
 
 		template<typename T>
-		void push_vector2(T x, T y)
-		{
+		void push_vector2(T x, T y) {
 			auto const idx = create_map(2);
 			set_map_value(idx, "x", x);
 			set_map_value(idx, "y", y);
 		}
 
 		template<typename T>
-		void push_vector2(T vec2)
-		{
+		void push_vector2(T vec2) {
 			auto const idx = create_map(2);
 			set_map_value(idx, "x", vec2.x);
 			set_map_value(idx, "y", vec2.y);
@@ -157,48 +159,42 @@ namespace lua
 		inline void set_map_value(stack_index_t index, std::string_view key, T value) { typename T::__invalid_type__ _{}; }
 
 		template<>
-		inline void set_map_value(stack_index_t index, std::string_view key, int32_t value)
-		{
+		inline void set_map_value(stack_index_t index, std::string_view key, int32_t value) {
 			push_value(key);
 			push_value(value);
 			lua_settable(L, index.value);
 		}
 
 		template<>
-		inline void set_map_value(stack_index_t index, std::string_view key, uint32_t value)
-		{
+		inline void set_map_value(stack_index_t index, std::string_view key, uint32_t value) {
 			push_value(key);
 			push_value(value);
 			lua_settable(L, index.value);
 		}
 
 		template<>
-		inline void set_map_value(stack_index_t index, std::string_view key, float value)
-		{
+		inline void set_map_value(stack_index_t index, std::string_view key, float value) {
 			push_value(key);
 			push_value(value);
 			lua_settable(L, index.value);
 		}
 
 		template<>
-		inline void set_map_value(stack_index_t index, std::string_view key, double value)
-		{
+		inline void set_map_value(stack_index_t index, std::string_view key, double value) {
 			push_value(key);
 			push_value(value);
 			lua_settable(L, index.value);
 		}
 
 		template<>
-		inline void set_map_value(stack_index_t index, std::string_view key, stack_index_t value)
-		{
+		inline void set_map_value(stack_index_t index, std::string_view key, stack_index_t value) {
 			push_value(key);
 			push_value(value);
 			lua_settable(L, index.value);
 		}
 
 		template<>
-		inline void set_map_value(stack_index_t index, std::string_view key, lua_CFunction value)
-		{
+		inline void set_map_value(stack_index_t index, std::string_view key, lua_CFunction value) {
 			push_value(key);
 			push_value(value);
 			lua_settable(L, index.value);
@@ -208,7 +204,7 @@ namespace lua
 
 		template<typename T>
 		T get_value(stack_index_t const index) {
-			if constexpr  (std::is_same_v<T, bool>) {
+			if constexpr (std::is_same_v<T, bool>) {
 				return lua_toboolean(L, index.value);
 			}
 			else if constexpr (std::is_same_v<T, int32_t>) {
@@ -247,19 +243,24 @@ namespace lua
 				if (has_value(index))
 					return lua_toboolean(L, index.value);
 				return default_value;
-			} else if constexpr (std::is_same_v<T, int32_t>) {
+			}
+			else if constexpr (std::is_same_v<T, int32_t>) {
 				return static_cast<int32_t>(luaL_optinteger(L, index.value, default_value));
-			} else if constexpr (std::is_same_v<T, uint32_t>) {
+			}
+			else if constexpr (std::is_same_v<T, uint32_t>) {
 				return static_cast<uint32_t>(luaL_optnumber(L, index.value, static_cast<lua_Number>(default_value)));
-			} else if constexpr (std::is_same_v<T, float>) {
+			}
+			else if constexpr (std::is_same_v<T, float>) {
 				if (has_value(index))
 					return static_cast<float>(luaL_checknumber(L, index.value));
 				return default_value;
-			} else if constexpr (std::is_same_v<T, double>) {
+			}
+			else if constexpr (std::is_same_v<T, double>) {
 				if (has_value(index))
 					return luaL_checknumber(L, index.value);
 				return default_value;
-			} else {
+			}
+			else {
 				static_assert(false, "FIXME");
 				return {};
 			}
@@ -299,8 +300,7 @@ namespace lua
 		inline T get_map_value(stack_index_t index, std::string_view key) { return typename T::__invalid_type__{}; }
 
 		template<>
-		inline uint32_t get_map_value(stack_index_t index, std::string_view key)
-		{
+		inline uint32_t get_map_value(stack_index_t index, std::string_view key) {
 			push_value(key);
 			lua_gettable(L, index.value);
 			auto const s = get_value<uint32_t>(-1);
@@ -309,8 +309,7 @@ namespace lua
 		}
 
 		template<>
-		inline double get_map_value(stack_index_t index, std::string_view key)
-		{
+		inline double get_map_value(stack_index_t index, std::string_view key) {
 			push_value(key);
 			lua_gettable(L, index.value);
 			auto const s = get_value<double>(-1);
@@ -319,8 +318,7 @@ namespace lua
 		}
 
 		template<>
-		inline std::string_view get_map_value(stack_index_t index, std::string_view key)
-		{
+		inline std::string_view get_map_value(stack_index_t index, std::string_view key) {
 			push_value(key);
 			lua_gettable(L, index.value);
 			auto const s = get_value<std::string_view>(-1);
@@ -328,8 +326,7 @@ namespace lua
 			return s;
 		}
 
-		inline bool has_map_value(stack_index_t index, std::string_view key)
-		{
+		inline bool has_map_value(stack_index_t index, std::string_view key) {
 			push_value(key);
 			lua_gettable(L, index.value);
 			auto const r = has_value(-1) && !is_nil(-1);

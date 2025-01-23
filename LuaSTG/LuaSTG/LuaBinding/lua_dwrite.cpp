@@ -14,7 +14,7 @@
 #include "AppFrame.h"
 #include "utf8.hpp"
 #include "LuaBinding/LuaWrapper.hpp"
-#include "LuaBinding/lua_utility.hpp"
+#include "lua/plus.hpp"
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX

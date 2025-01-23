@@ -1,5 +1,5 @@
 #include "GameObject/GameObjectClass.hpp"
-#include "LuaBinding/lua_utility.hpp"
+#include "lua/plus.hpp"
 
 namespace LuaSTGPlus
 {
