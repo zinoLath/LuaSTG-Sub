@@ -173,6 +173,7 @@ endif()
 target_link_libraries(LuaSTG PRIVATE
     spdlog
     utility
+    utf8
     PlatformAPI
     DirectX::ToolKitMini
     DirectX::TextureMini
