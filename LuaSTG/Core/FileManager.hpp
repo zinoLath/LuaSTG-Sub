@@ -21,9 +21,7 @@ namespace Core
         size_t size{};
     };
     
-    class FileNodeTree
-    {
-    public:
+    struct FileNodeTree {
         virtual size_t findIndex(std::string_view const& name) = 0;
         virtual size_t getCount() = 0;
         virtual size_t getSize(size_t index) = 0;
@@ -31,7 +29,7 @@ namespace Core
         virtual FileType getType(size_t index) = 0;
         virtual FileType getType(std::string_view const& name) = 0;
         virtual std::string_view getName(size_t index) = 0;
-        virtual bool contain(std::string_view const& name) = 0;
+        virtual bool contain(std::string_view const& name) const = 0;
         virtual bool load(std::string_view const& name, std::vector<uint8_t>& buffer) = 0;
         virtual bool load(std::string_view const& name, IData** pp_data) = 0;
     };
@@ -53,7 +51,7 @@ namespace Core
         FileType getType(size_t index);
         FileType getType(std::string_view const& name);
         std::string_view getName(size_t index);
-        bool contain(std::string_view const& name);
+        [[nodiscard]] bool contain(std::string_view const& name) const;
         bool load(std::string_view const& name, std::vector<uint8_t>& buffer);
         bool load(std::string_view const& name, IData** pp_data);
     public:
@@ -86,7 +84,7 @@ namespace Core
         FileType getType(size_t index);
         FileType getType(std::string_view const& name);
         std::string_view getName(size_t index);
-        bool contain(std::string_view const& name);
+        [[nodiscard]] bool contain(std::string_view const& name) const;
         bool load(std::string_view const& name, std::vector<uint8_t>& buffer);
         bool load(std::string_view const& name, IData** pp_data);
     public:
@@ -101,10 +99,14 @@ namespace Core
         void unloadAllFileArchive();
     public:
         void addSearchPath(std::string_view const& path);
+        [[nodiscard]] bool hasSearchPath(std::string_view const& path) const;
         void removeSearchPath(std::string_view const& path);
         void clearSearchPath();
     public:
-        bool containEx(std::string_view const& name);
+        [[nodiscard]] bool containsIgnoreSearchPath(std::string_view const& name) const;
+        [[nodiscard]] bool containEx(std::string_view const& name) const;
+        bool loadFromFileSystemAndArchiveIgnoreSearchPath(std::string_view const& name, std::vector<uint8_t>& buffer);
+        bool loadFromFileSystemAndArchiveIgnoreSearchPath(std::string_view const& name, IData** pp_data);
         bool loadEx(std::string_view const& name, std::vector<uint8_t>& buffer);
         bool loadEx(std::string_view const& name, IData** pp_data);
         bool write(std::string_view const& name, std::vector<uint8_t> const& buffer);

@@ -5,64 +5,66 @@
 #include <string_view>
 #include <string>
 
-namespace Core
-{
+namespace Core {
 	// 二维向量
 
 	template<typename T>
-	struct Vector2
-	{
+	struct Vector2 {
 		T x{};
 		T y{};
 
 		Vector2() noexcept : x(0), y(0) {}
-		Vector2(T const x_, T const y_) noexcept : x(x_), y(y_) {}
+		Vector2(T const x, T const y) noexcept : x(x), y(y) {}
 
-		inline Vector2 operator+(Vector2 const& r) const noexcept { return Vector2(x + r.x, y + r.y); }
-		inline Vector2 operator-(Vector2 const& r) const noexcept { return Vector2(x - r.x, y - r.y); }
-		inline Vector2 operator*(T const r) const noexcept { return Vector2(x * r, y * r); }
-		inline Vector2 operator/(T const r) const noexcept { return Vector2(x / r, y / r); }
+		[[nodiscard]] Vector2 operator+(Vector2 const& r) const noexcept { return Vector2(x + r.x, y + r.y); }
+		[[nodiscard]] Vector2 operator-(Vector2 const& r) const noexcept { return Vector2(x - r.x, y - r.y); }
+		[[nodiscard]] Vector2 operator*(Vector2 const& r) const noexcept { return Vector2(x * r.x, y * r.y); }
+		[[nodiscard]] Vector2 operator/(Vector2 const& r) const noexcept { return Vector2(x / r.x, y / r.y); }
 
-		inline Vector2& operator+=(Vector2 const& r) noexcept { x += r.x; y += r.y; return *this; }
-		inline Vector2& operator-=(Vector2 const& r) noexcept { x -= r.x; y -= r.y; return *this; }
-		inline Vector2& operator*=(T const r) noexcept { x *= r; y *= r; return *this; }
-		inline Vector2& operator/=(T const r) noexcept { x /= r; y /= r; return *this; }
+		[[nodiscard]] Vector2 operator+(T const r) const noexcept { return Vector2(x + r, y + r); }
+		[[nodiscard]] Vector2 operator-(T const r) const noexcept { return Vector2(x - r, y - r); }
+		[[nodiscard]] Vector2 operator*(T const r) const noexcept { return Vector2(x * r, y * r); }
+		[[nodiscard]] Vector2 operator/(T const r) const noexcept { return Vector2(x / r, y / r); }
 
-		inline bool operator==(Vector2 const& r) const noexcept { return x == r.x && y == r.y; }
-		inline bool operator!=(Vector2 const& r) const noexcept { return x != r.x || y != r.y; }
+		[[nodiscard]] Vector2 operator-() const noexcept { return Vector2(-x, -y); }
 
-		inline float operator*(Vector2 const& r) const noexcept { return x * r.x + y * r.y; }
-		inline Vector2 operator-() const noexcept { return Vector2(-x, -y); }
+		Vector2& operator+=(Vector2 const& r) noexcept { x += r.x; y += r.y; return *this; }
+		Vector2& operator-=(Vector2 const& r) noexcept { x -= r.x; y -= r.y; return *this; }
+		Vector2& operator*=(Vector2 const& r) noexcept { x *= r.x; y *= r.y; return *this; }
+		Vector2& operator/=(Vector2 const& r) noexcept { x /= r.x; y /= r.y; return *this; }
 
-		inline Vector2& normalize() noexcept
-		{
+		Vector2& operator+=(T const r) noexcept { x += r; y += r; return *this; }
+		Vector2& operator-=(T const r) noexcept { x -= r; y -= r; return *this; }
+		Vector2& operator*=(T const r) noexcept { x *= r; y *= r; return *this; }
+		Vector2& operator/=(T const r) noexcept { x /= r; y /= r; return *this; }
+
+		[[nodiscard]] bool operator==(Vector2 const& r) const noexcept { return x == r.x && y == r.y; }
+		[[nodiscard]] bool operator!=(Vector2 const& r) const noexcept { return x != r.x || y != r.y; }
+
+		Vector2& normalize() noexcept {
 			T const l = length();
-			if (l >= std::numeric_limits<T>::min())
-			{
+			if (l >= std::numeric_limits<T>::min()) {
 				x /= l; y /= l;
 			}
-			else
-			{
+			else {
 				x = T{}; y = T{};
 			}
 			return *this;
 		}
-		inline Vector2 normalized() const noexcept
-		{
+		[[nodiscard]] Vector2 normalized() const noexcept {
 			T const l = length();
-			if (l >= std::numeric_limits<T>::min())
-			{
+			if (l >= std::numeric_limits<T>::min()) {
 				return Vector2(x / l, y / l);
 			}
-			else
-			{
+			else {
 				return Vector2();
 			}
 		}
-		inline T length() const noexcept { return std::sqrt(x * x + y * y); }
-		inline T angle() const noexcept { return std::atan2(y, x); }
+		[[nodiscard]] T length() const noexcept { return std::sqrt(x * x + y * y); }
+		[[nodiscard]] T angle() const noexcept { return std::atan2(y, x); }
+		[[nodiscard]] T dot(Vector2 const& r) const noexcept { return x * r.x + y * r.y; }
 
-		inline T& operator[](size_t const i) { return (&x)[i]; }
+		[[nodiscard]] T& operator[](size_t const i) { return (&x)[i]; }
 	};
 
 	using Vector2I = Vector2<int32_t>;
@@ -72,20 +74,19 @@ namespace Core
 	// 表示一个长方形区域
 
 	template<typename T>
-	struct Rect
-	{
+	struct Rect {
 		Vector2<T> a;
 		Vector2<T> b;
 
-		Rect() noexcept {}
-		Rect(Vector2<T> const& a_, Vector2<T> const& b_) noexcept : a(a_), b(b_) {}
+		Rect() noexcept = default;
+		Rect(Vector2<T> const& a, Vector2<T> const& b) noexcept : a(a), b(b) {}
 		Rect(T const left, T const top, T const right, T const bottom) noexcept : a(left, top), b(right, bottom) {}
 
-		inline bool operator==(Rect const& r) const noexcept { return a == r.a && b == r.b; }
-		inline bool operator!=(Rect const& r) const noexcept { return a != r.a || b != r.b; }
+		[[nodiscard]] bool operator==(Rect const& r) const noexcept { return a == r.a && b == r.b; }
+		[[nodiscard]] bool operator!=(Rect const& r) const noexcept { return a != r.a || b != r.b; }
 
-		inline Rect operator+(Vector2<T> const& r) const noexcept { return Rect(a + r, b + r); }
-		inline Rect operator-(Vector2<T> const& r) const noexcept { return Rect(a - r, b - r); }
+		[[nodiscard]] Rect operator+(Vector2<T> const& r) const noexcept { return Rect(a + r, b + r); }
+		[[nodiscard]] Rect operator-(Vector2<T> const& r) const noexcept { return Rect(a - r, b - r); }
 
 		//inline Rect operator*(T const r) const noexcept { return Rect(a * r, b * r); }
 	};
@@ -97,29 +98,63 @@ namespace Core
 	// 三维向量
 
 	template<typename T>
-	struct Vector3
-	{
+	struct Vector3 {
 		T x{};
 		T y{};
 		T z{};
 
 		Vector3() noexcept : x(0), y(0), z(0) {}
-		Vector3(T const x_, T const y_, T const z_) noexcept : x(x_), y(y_), z(z_) {}
+		Vector3(Vector2<T> const& xy, T const z) noexcept : x(xy.x), y(xy.y), z(z) {}
+		Vector3(T const x, T const y, T const z) noexcept : x(x), y(y), z(z) {}
 
-		inline Vector3 operator+(Vector3 const& r) const noexcept { return Vector3(x + r.x, y + r.y, z + r.z); }
-		inline Vector3 operator-(Vector3 const& r) const noexcept { return Vector3(x - r.x, y - r.y, z - r.z); }
-		inline Vector3 operator*(T const r) const noexcept { return Vector3(x * r, y * r, z * r); }
-		inline Vector3 operator/(T const r) const noexcept { return Vector3(x / r, y / r, z / r); }
+		[[nodiscard]] Vector3 operator+(Vector3 const& r) const noexcept { return Vector3(x + r.x, y + r.y, z + r.z); }
+		[[nodiscard]] Vector3 operator-(Vector3 const& r) const noexcept { return Vector3(x - r.x, y - r.y, z - r.z); }
+		[[nodiscard]] Vector3 operator*(Vector3 const& r) const noexcept { return Vector3(x * r.x, y * r.y, z * r.z); }
+		[[nodiscard]] Vector3 operator/(Vector3 const& r) const noexcept { return Vector3(x / r.x, y / r.y, z / r.z); }
 
-		inline Vector3& operator+=(Vector3 const& r) noexcept { x += r.x; y += r.y; z += r.z; return *this; }
-		inline Vector3& operator-=(Vector3 const& r) noexcept { x -= r.x; y -= r.y; z -= r.z; return *this; }
-		inline Vector3& operator*=(T const r) noexcept { x *= r; y *= r; z *= r; return *this; }
-		inline Vector3& operator/=(T const r) noexcept { x /= r; y /= r; z /= r; return *this; }
+		[[nodiscard]] Vector3 operator+(T const r) const noexcept { return Vector3(x + r, y + r, z + r); }
+		[[nodiscard]] Vector3 operator-(T const r) const noexcept { return Vector3(x - r, y - r, z - r); }
+		[[nodiscard]] Vector3 operator*(T const r) const noexcept { return Vector3(x * r, y * r, z * r); }
+		[[nodiscard]] Vector3 operator/(T const r) const noexcept { return Vector3(x / r, y / r, z / r); }
 
-		inline bool operator==(Vector3 const& r) const noexcept { return x == r.x && y == r.y && z == r.z; }
-		inline bool operator!=(Vector3 const& r) const noexcept { return x != r.x || y != r.y || z != r.z; }
+		[[nodiscard]] Vector3 operator-() const noexcept { return Vector3(-x, -y, -z); }
 
-		inline T& operator[](size_t const i) { return (&x)[i]; }
+		Vector3& operator+=(Vector3 const& r) noexcept { x += r.x; y += r.y; z += r.z; return *this; }
+		Vector3& operator-=(Vector3 const& r) noexcept { x -= r.x; y -= r.y; z -= r.z; return *this; }
+		Vector3& operator*=(Vector3 const& r) noexcept { x *= r.x; y *= r.y; z *= r.z; return *this; }
+		Vector3& operator/=(Vector3 const& r) noexcept { x /= r.x; y /= r.y; z /= r.z; return *this; }
+
+		Vector3& operator+=(T const r) noexcept { x += r; y += r; z += r; return *this; }
+		Vector3& operator-=(T const r) noexcept { x -= r; y -= r; z -= r; return *this; }
+		Vector3& operator*=(T const r) noexcept { x *= r; y *= r; z *= r; return *this; }
+		Vector3& operator/=(T const r) noexcept { x /= r; y /= r; z /= r; return *this; }
+
+		[[nodiscard]] bool operator==(Vector3 const& r) const noexcept { return x == r.x && y == r.y && z == r.z; }
+		[[nodiscard]] bool operator!=(Vector3 const& r) const noexcept { return x != r.x || y != r.y || z != r.z; }
+
+		[[nodiscard]] T& operator[](size_t const i) { return (&x)[i]; }
+
+		[[nodiscard]] Vector3& normalize() noexcept {
+			T const l = length();
+			if (l >= std::numeric_limits<T>::min()) {
+				x /= l; y /= l; z /= l;
+			}
+			else {
+				x = T{}; y = T{}; z = T{};
+			}
+			return *this;
+		}
+		[[nodiscard]] Vector3 normalized() const noexcept {
+			T const l = length();
+			if (l >= std::numeric_limits<T>::min()) {
+				return Vector3(x / l, y / l, z / l);
+			}
+			else {
+				return Vector3();
+			}
+		}
+		[[nodiscard]] T length() const noexcept { return std::sqrt(x * x + y * y + z * z); }
+		[[nodiscard]] T dot(Vector3 const& r) const noexcept { return x * r.x + y * r.y + z * r.z; }
 	};
 
 	using Vector3I = Vector3<int32_t>;
@@ -129,17 +164,16 @@ namespace Core
 	// 表示一个长方体区域
 
 	template<typename T>
-	struct Box
-	{
+	struct Box {
 		Vector3<T> a;
 		Vector3<T> b;
 
-		Box() noexcept {}
-		Box(Vector3<T> const& a_, Vector3<T> const& b_) noexcept : a(a_), b(b_) {}
+		Box() noexcept = default;
+		Box(Vector3<T> const& a, Vector3<T> const& b) noexcept : a(a), b(b) {}
 		Box(T const left, T const top, T const front, T const right, T const bottom, T const back) noexcept : a(left, top, front), b(right, bottom, back) {}
 
-		inline bool operator==(Box const& r) const noexcept { return a == r.a && b == r.b; }
-		inline bool operator!=(Box const& r) const noexcept { return a != r.a || b != r.b; }
+		[[nodiscard]] bool operator==(Box const& r) const noexcept { return a == r.a && b == r.b; }
+		[[nodiscard]] bool operator!=(Box const& r) const noexcept { return a != r.a || b != r.b; }
 	};
 
 	using BoxI = Box<int32_t>;
@@ -149,30 +183,65 @@ namespace Core
 	// 四维向量
 
 	template<typename T>
-	struct Vector4
-	{
+	struct Vector4 {
 		T x{};
 		T y{};
 		T z{};
 		T w{};
 
 		Vector4() noexcept : x(0), y(0), z(0), w(0) {}
-		Vector4(T const x_, T const y_, T const z_, T const w_) noexcept : x(x_), y(y_), z(z_), w(w_) {}
+		Vector4(Vector2<T> const& xy, T const z, T const w) noexcept : x(xy.x), y(xy.y), z(z), w(w) {}
+		Vector4(Vector3<T> const& xyz, T const w) noexcept : x(xyz.x), y(xyz.y), z(xyz.z), w(w) {}
+		Vector4(T const x, T const y, T const z, T const w) noexcept : x(x), y(y), z(z), w(w) {}
 
-		inline Vector4 operator+(Vector4 const& r) const noexcept { return Vector4(x + r.x, y + r.y, z + r.z, w + r.w); }
-		inline Vector4 operator-(Vector4 const& r) const noexcept { return Vector4(x - r.x, y - r.y, z - r.z, w - r.w); }
-		inline Vector4 operator*(T const r) const noexcept { return Vector4(x * r, y * r, z * r, w * r); }
-		inline Vector4 operator/(T const r) const noexcept { return Vector4(x / r, y / r, z / r, w / r); }
+		[[nodiscard]] Vector4 operator+(Vector4 const& r) const noexcept { return Vector4(x + r.x, y + r.y, z + r.z, w + r.w); }
+		[[nodiscard]] Vector4 operator-(Vector4 const& r) const noexcept { return Vector4(x - r.x, y - r.y, z - r.z, w - r.w); }
+		[[nodiscard]] Vector4 operator*(Vector4 const& r) const noexcept { return Vector4(x * r.x, y * r.y, z * r.z, w * r.w); }
+		[[nodiscard]] Vector4 operator/(Vector4 const& r) const noexcept { return Vector4(x / r.x, y / r.y, z / r.z, w / r.w); }
 
-		inline Vector4& operator+=(Vector4 const& r) noexcept { x += r.x; y += r.y; z += r.z; w += r.w; return *this; }
-		inline Vector4& operator-=(Vector4 const& r) noexcept { x -= r.x; y -= r.y; z -= r.z; w -= r.w; return *this; }
-		inline Vector4& operator*=(T const r) noexcept { x *= r; y *= r; z *= z; w *= r; return *this; }
-		inline Vector4& operator/=(T const r) noexcept { x /= r; y /= r; z /= z; w /= r; return *this; }
+		[[nodiscard]] Vector4 operator+(T const r) const noexcept { return Vector4(x + r, y + r, z + r, w + r); }
+		[[nodiscard]] Vector4 operator-(T const r) const noexcept { return Vector4(x - r, y - r, z - r, w - r); }
+		[[nodiscard]] Vector4 operator*(T const r) const noexcept { return Vector4(x * r, y * r, z * r, w * r); }
+		[[nodiscard]] Vector4 operator/(T const r) const noexcept { return Vector4(x / r, y / r, z / r, w / r); }
 
-		inline bool operator==(Vector4 const& r) const noexcept { return x == r.x && y == r.y && z == r.z && w == r.w; }
-		inline bool operator!=(Vector4 const& r) const noexcept { return x != r.x || y != r.y || z != r.z || w != r.w; }
+		[[nodiscard]] Vector4 operator-() const noexcept { return Vector4(-x, -y, -z, -w); }
 
-		inline T& operator[](size_t const i) { return (&x)[i]; }
+		Vector4& operator+=(Vector4 const& r) noexcept { x += r.x; y += r.y; z += r.z; w += r.w; return *this; }
+		Vector4& operator-=(Vector4 const& r) noexcept { x -= r.x; y -= r.y; z -= r.z; w -= r.w; return *this; }
+		Vector4& operator*=(Vector4 const& r) noexcept { x *= r.x; y *= r.y; z *= r.z; w *= r.w; return *this; }
+		Vector4& operator/=(Vector4 const& r) noexcept { x /= r.x; y /= r.y; z /= r.z; w /= r.w; return *this; }
+
+		Vector4& operator+=(T const r) noexcept { x += r; y += r; z += z; w += r; return *this; }
+		Vector4& operator-=(T const r) noexcept { x -= r; y -= r; z -= z; w -= r; return *this; }
+		Vector4& operator*=(T const r) noexcept { x *= r; y *= r; z *= z; w *= r; return *this; }
+		Vector4& operator/=(T const r) noexcept { x /= r; y /= r; z /= z; w /= r; return *this; }
+
+		[[nodiscard]] bool operator==(Vector4 const& r) const noexcept { return x == r.x && y == r.y && z == r.z && w == r.w; }
+		[[nodiscard]] bool operator!=(Vector4 const& r) const noexcept { return x != r.x || y != r.y || z != r.z || w != r.w; }
+
+		[[nodiscard]] T& operator[](size_t const i) { return (&x)[i]; }
+
+		Vector4& normalize() noexcept {
+			T const l = length();
+			if (l >= std::numeric_limits<T>::min()) {
+				x /= l; y /= l; z /= l; w /= l;
+			}
+			else {
+				x = T{}; y = T{}; z = T{}; w = T{};
+			}
+			return *this;
+		}
+		[[nodiscard]] Vector4 normalized() const noexcept {
+			T const l = length();
+			if (l >= std::numeric_limits<T>::min()) {
+				return Vector4(x / l, y / l, z / l, w / l);
+			}
+			else {
+				return Vector4();
+			}
+		}
+		[[nodiscard]] T length() const noexcept { return std::sqrt(x * x + y * y + z * z + w * w); }
+		[[nodiscard]] T dot(Vector4 const& r) const noexcept { return x * r.x + y * r.y + z * r.z + w * r.w; }
 	};
 
 	using Vector4I = Vector4<int32_t>;
@@ -194,7 +263,7 @@ namespace Core
 			T m[4][4];
 		} u;
 
-		bool operator==(Matrix4 const& other) const noexcept {
+		[[nodiscard]] bool operator==(Matrix4 const& other) const noexcept {
 			return u.s.m11 == other.u.s.m11
 				&& u.s.m12 == other.u.s.m12
 				&& u.s.m13 == other.u.s.m13
@@ -212,7 +281,7 @@ namespace Core
 				&& u.s.m43 == other.u.s.m43
 				&& u.s.m44 == other.u.s.m44;
 		}
-		bool operator!=(Matrix4 const& other) const noexcept {
+		[[nodiscard]] bool operator!=(Matrix4 const& other) const noexcept {
 			return u.s.m11 != other.u.s.m11
 				|| u.s.m12 != other.u.s.m12
 				|| u.s.m13 != other.u.s.m13
@@ -231,7 +300,7 @@ namespace Core
 				|| u.s.m44 != other.u.s.m44;
 		}
 
-		static Matrix4 identity() noexcept {
+		[[nodiscard]] static Matrix4 identity() noexcept {
 			Matrix4 m{};
 			m.u.s.m11 = static_cast<T>(1);
 			m.u.s.m22 = static_cast<T>(1);
@@ -245,35 +314,31 @@ namespace Core
 
 	// 颜色（有黑魔法）
 
-	struct alignas(uint32_t) Color4B
-	{
-		uint8_t b;
-		uint8_t g;
-		uint8_t r;
-		uint8_t a;
+	struct alignas(uint32_t) Color4B {
+		uint8_t b{};
+		uint8_t g{};
+		uint8_t r{};
+		uint8_t a{};
 
-		Color4B() : b(0), g(0), r(0), a(0) {}
-		Color4B(uint32_t ARGB) : b(0), g(0), r(0), a(0) { color(ARGB); }
-		Color4B(uint8_t const r_, uint8_t const g_, uint8_t const b_) : b(b_), g(g_), r(r_), a(static_cast<uint8_t>(255u)) {}
-		Color4B(uint8_t const r_, uint8_t const g_, uint8_t const b_, uint8_t const a_) : b(b_), g(g_), r(r_), a(a_) {}
+		Color4B() noexcept = default;
+		explicit Color4B(uint32_t const argb) noexcept { color(argb); }
+		Color4B(uint8_t const r, uint8_t const g, uint8_t const b) : b(b), g(g), r(r), a(255) {}
+		Color4B(uint8_t const r, uint8_t const g, uint8_t const b, uint8_t const a) : b(b), g(g), r(r), a(a) {}
 
-		inline void color(uint32_t ARGB) noexcept { *((uint32_t*)(&b)) = ARGB; }
-		inline uint32_t color() const noexcept { return *((uint32_t*)(&b)); }
+		void color(uint32_t const argb) noexcept { *reinterpret_cast<uint32_t*>(this) = argb; }
+		[[nodiscard]] uint32_t color() const noexcept { return *reinterpret_cast<uint32_t const*>(this); }
 
-		bool operator==(Color4B const& right) const noexcept
-		{
-			return color() == right.color();
-		}
-		bool operator!=(Color4B const& right) const noexcept
-		{
-			return color() != right.color();
-		}
+		Color4B& operator=(uint32_t const argb) noexcept { color(argb); return *this; }
+
+		[[nodiscard]] bool operator==(Color4B const& right) const noexcept { return color() == right.color(); }
+		[[nodiscard]] bool operator!=(Color4B const& right) const noexcept { return color() != right.color(); }
 	};
+
+	static_assert(sizeof(Color4B) == sizeof(uint32_t));
 
 	// 分数
 
-	struct Rational
-	{
+	struct Rational {
 		uint32_t numerator; // 分子
 		uint32_t denominator; // 分母
 
@@ -282,23 +347,16 @@ namespace Core
 		Rational(uint32_t const numerator_, uint32_t const denominator_) : numerator(numerator_), denominator(denominator_) {}
 	};
 
-	// 字符串
-
-	using String = std::string;
-	using StringView = std::string_view;
-
 	// 引用计数
 
-	struct IObject
-	{
+	struct IObject {
 		virtual intptr_t retain() = 0;
 		virtual intptr_t release() = 0;
 		virtual ~IObject() {};
 	};
-	
+
 	template<typename T = IObject>
-	class ScopeObject
-	{
+	class ScopeObject {
 	private:
 		T* ptr_;
 	private:
@@ -314,7 +372,7 @@ namespace Core
 		ScopeObject& operator=(ScopeObject const& right) { if (ptr_ != right.ptr_) { internal_release(); ptr_ = right.ptr_; internal_retain(); } return *this; }
 		operator bool() { return ptr_ != nullptr; }
 		ScopeObject& attach(T* ptr) { internal_release(); ptr_ = ptr; return *this; }
-		T* detach()  { T* tmp_ = ptr_; ptr_ = nullptr; return tmp_; }
+		T* detach() { T* tmp_ = ptr_; ptr_ = nullptr; return tmp_; }
 		ScopeObject& reset() { internal_release(); return *this; }
 		T* get() const { return ptr_; }
 	public:
@@ -327,12 +385,30 @@ namespace Core
 		~ScopeObject() { internal_release(); }
 	};
 
-	struct IData : public IObject
-	{
+	struct IData : public IObject {
 		virtual void* data() = 0;
 		virtual size_t size() = 0;
 
 		static bool create(size_t size, IData** pp_data);
 		static bool create(size_t size, size_t align, IData** pp_data);
 	};
+
+	// 字符串视图
+
+	using StringView = std::string_view; // pointer | size
+
+	// 不可变的空终止字符串
+
+	struct IImmutableString : IObject {
+		[[nodiscard]] virtual bool empty() const noexcept = 0;
+		[[nodiscard]] virtual char const* data() const noexcept = 0;
+		[[nodiscard]] virtual size_t size() const noexcept = 0;
+		[[nodiscard]] virtual char const* c_str() const noexcept = 0;
+		[[nodiscard]] virtual size_t length() const noexcept = 0;
+		[[nodiscard]] virtual StringView view() const noexcept = 0;
+
+		static void create(StringView const& view, IImmutableString** output);
+		static void create(char const* data, size_t size, IImmutableString** output);
+	};
+
 }

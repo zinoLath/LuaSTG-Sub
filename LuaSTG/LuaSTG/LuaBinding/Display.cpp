@@ -67,8 +67,9 @@ namespace LuaSTG::Sub::LuaBinding {
 		static int getFriendlyName(lua_State* L) {
 			auto self = as(L, 1);
 			lua::stack_t S(L);
-			auto const friendly_name = self->data->getFriendlyName();
-			S.push_value(friendly_name);
+			Core::ScopeObject<Core::IImmutableString> friendly_name;
+			self->data->getFriendlyName(~friendly_name);
+			S.push_value(friendly_name->view());
 			return 1;
 		}
 
@@ -205,7 +206,7 @@ namespace LuaSTG::Sub::LuaBinding {
 
 		// method
 
-		auto const method_table = S.push_module(class_name);
+		auto const method_table = S.create_module(class_name);
 		S.set_map_value(method_table, "getFriendlyName", &DisplayBinding::getFriendlyName);
 		S.set_map_value(method_table, "getSize", &DisplayBinding::getSize);
 		S.set_map_value(method_table, "getPosition", &DisplayBinding::getPosition);
