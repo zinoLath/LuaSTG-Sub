@@ -547,8 +547,8 @@ namespace Core::Graphics
 			blendt_.SrcBlend = D3D11_BLEND_DEST_COLOR;
 			blendt_.DestBlend = D3D11_BLEND_ZERO;
 			blendt_.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-			blendt_.SrcBlendAlpha = D3D11_BLEND_ONE;
-			blendt_.DestBlendAlpha = D3D11_BLEND_ZERO;
+			blendt_.SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
+			blendt_.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
 			copy_();
 			hr = gHR = m_device->GetD3D11Device()->CreateBlendState(&desc_, &_blend_state[IDX(BlendState::Mul)]);
 			if (FAILED(hr))
